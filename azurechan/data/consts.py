@@ -1,6 +1,5 @@
 from aenum import Enum, skip
 
-
 class CONSTS(Enum):
     @skip
     class SQL(Enum):
@@ -62,7 +61,7 @@ class CONSTS(Enum):
                      "Speed": u'⏩', "Luck": u'🎱', "ASW": u'🛥', "Oxygen": u'☁', "Ammo": u'🎹',
                      "ConstructTime": u'🛠', "Firepower": u'🔥', "Aviation": u'🛩', "RoF": u'♻',
                      "Accuracy": u'🎯', "Torpedo": u'🥢', 'Coin': u'📀', "Medal": u'🎖', 'Tech': u'✨',
-                     "Oil": u'🛢'}
+                     "Oil": u'🛢', "Evasion": u'👥'}
 
             TYPES = ("Health", "Armor", "Oil", "Acc", "Fire",
                      "Reload", "Anti-Air", "Torpedo", "Aviation", "Evasion",
@@ -74,15 +73,3 @@ class CONSTS(Enum):
                       "Fire": "Fire", "Reload": "Reload", "Anti-Air": "AA", "Torpedo": "Torp",
                       "Aviation": "Air", "Evasion": "Evade", "Speed": "Speed", "Luck": "Luck",
                       "ASW": "ASW", "Ammo": "Ammo", "Oxygen": "Oxygen", "Construction": "ConstructTime"}
-
-            @skip
-            class DATA(Enum):
-                INIT = ()
-                MAX = ()
-                MAX_COG = ()
-                RETRO = ()
-                RETRO_COG = ()
-
-        @skip
-        class SKILLS(Enum):
-            pass
