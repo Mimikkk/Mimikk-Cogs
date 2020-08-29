@@ -1,8 +1,0 @@
-{
-    "author": ["Inwazzin (Mimikku#3200)"],
-    "install_msg": "Thanks for adding my repo! Should you encounter any issues, post an issue on the GitHub.",
-    "name": "Mimikk's Cogs",
-    "short": "A Cog which displays data about Azure Lane ships and recent news",
-    "description": "A Cog which displays data about Azure Lane ships and recent news",
-    "tags": ["azurelane", "cog"]
-}
