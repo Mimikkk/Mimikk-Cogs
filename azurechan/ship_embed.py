@@ -163,10 +163,13 @@ class ShipEmbed(object):
         def format_lb(n: int) -> str:
             return '\n'.join(map(lambda x: '• ' + x, lb.split(' / '))) if (lb := self.__data[f'LB{n}']) else "\u200b"
 
+        def format_tooltips(str_: str) -> str:
+            return re.sub(r'{{Tooltip\|(.+?)\|.+?}}', lambda g: g.group(1), str_)
+
         def listify_strengthen(n: int) -> str:
             return re.sub(r'{{(.+?)\}\}',
                           lambda g: get_stat_emoji(g.group(1)),
-                          re.sub(r'(</?li>(</?li>)?)', ';', self.__data[f'B{n}']).strip(';'))
+                          re.sub(r'(</?li>(</?li>)?)', ';', format_tooltips(self.__data[f'B{n}'])).strip(';'))
 
         def format_strengthen(n: int) -> str:
             return '\n'.join(map(lambda x: '• ' + x,
@@ -200,19 +203,22 @@ class ShipEmbed(object):
 
         def format_icons(str_: str) -> str:
             return re.sub(r'{{(.+?)\}\}', lambda g: get_stat_emoji(g.group(1)), str_)
-        embed = self.__page_constructor(6 + 2 * self.__is_retrofit, "Equipment & Misc.", has_banner=True)
 
+        def format_tooltips(str_: str) -> str:
+            return format_icons(re.sub(r'{{Tooltip\|(.+?)\|.+?}}', lambda g: g.group(1), str_))
+
+        embed = self.__page_constructor(6 + 2 * self.__is_retrofit, "Equipment & Misc.", has_banner=True)
+        print("IM WORKING FOR GODS SAKE")
         embed.add_field(name=u"🏹Equipment🏹", value=u"\u200b", inline=False)
         embed.add_field(name=f"{u'1️⃣'} {self.__data['Eq1Type']}", value=format_eq_eff(1), inline=False)
         embed.add_field(name=f"{u'2️⃣'} {self.__data['Eq2Type']}", value=format_eq_eff(2), inline=False)
         embed.add_field(name=f"{u'3️⃣'} {self.__data['Eq3Type']}", value=format_eq_eff(3), inline=False)
 
-
         embed.add_field(name=u"⚙Misc.⚙", value=u"\u200b", inline=False)
         embed.add_field(name=u"⛏ - Scrap Value",
-                        value=format_icons(self.__data['ScrapIncome']) if self.__data.get('ScrapIncome') else "This ship cannot be scrapped"
+                        value=format_tooltips(self.__data['ScrapIncome']) if self.__data.get('ScrapIncome') else "This ship cannot be scrapped"
                         , inline=False)
-        embed.add_field(name=u"✨ - Enhance Value", value=format_icons(self.__data['ReinforcementValue']) if self.__data.get('ReinforcementValue') else "This ship cannot be used to enhance", inline=False)
+        embed.add_field(name=u"✨ - Enhance Value", value=format_tooltips(self.__data['ReinforcementValue']) if self.__data.get('ReinforcementValue') else "This ship cannot be used to enhance", inline=False)
 
         if self.__data.get('StatBonusCollect'):
             embed.add_field(name=u"🧖‍♀️ - Collection Bonus",
