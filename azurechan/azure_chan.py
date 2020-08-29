@@ -12,10 +12,10 @@ class AzureCog(commands.Cog):
     @staticmethod
     def __update_ships():
         """Updates ship data stored inside the Cog, Use seldom, it's Semi-Long"""
-        cargo = cargo_query(tables="ships", fields="Name", limit="500")
+        cargo = cargo_query(tables="ships", fields="Name,Rarity", limit="500")
 
         for ship in cargo.json():
-            if ship['Name'] not in ship_names:
+            if ship['Rarity'] != "Unreleased" and ship['Name'] not in ship_names:
                 ship_names[unidecode(str(ship['Name'])).lower()] = str(ship['Name'])
 
     @commands.command(name="supported-ship-names")
