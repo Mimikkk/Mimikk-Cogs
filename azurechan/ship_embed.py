@@ -174,7 +174,6 @@ class ShipEmbed(object):
 
         embed = self.__page_constructor(5 + 2 * self.__is_retrofit, "Limit Breaks", has_banner=True)
 
-        print(*self.__data.items(),sep='\n', file=sys.stderr)
         formats_ = (u'1️⃣ - First - 5', u'2️⃣ - Second - 10', u'3️⃣ - Third - 15', u'4️⃣ - Forth - 20', u'5️⃣ - Fifth - 25', u'6️⃣ - Sixth - 30')
         if self.__is_tech:
             embed.add_field(name=u"🏵Strengthen Level🏵", value="\u200b", inline=False)
@@ -208,9 +207,12 @@ class ShipEmbed(object):
         embed.add_field(name=f"{u'2️⃣'} {self.__data['Eq2Type']}", value=format_eq_eff(2), inline=False)
         embed.add_field(name=f"{u'3️⃣'} {self.__data['Eq3Type']}", value=format_eq_eff(3), inline=False)
 
+
         embed.add_field(name=u"⚙Misc.⚙", value=u"\u200b", inline=False)
-        embed.add_field(name=u"⛏ - Scrap Value", value=format_icons(self.__data['ScrapIncome']), inline=False)
-        embed.add_field(name=u"✨ - Enhance Value", value=format_icons(self.__data['ReinforcementValue']), inline=False)
+        embed.add_field(name=u"⛏ - Scrap Value",
+                        value=format_icons(self.__data['ScrapIncome']) if self.__data.get('ScrapIncome') else "This ship cannot be scrapped"
+                        , inline=False)
+        embed.add_field(name=u"✨ - Enhance Value", value=format_icons(self.__data['ReinforcementValue']) if self.__data.get('ReinforcementValue') else "This ship cannot be used to enhance", inline=False)
 
         if self.__data.get('StatBonusCollect'):
             embed.add_field(name=u"🧖‍♀️ - Collection Bonus",
