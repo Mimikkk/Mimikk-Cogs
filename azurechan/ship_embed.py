@@ -208,7 +208,6 @@ class ShipEmbed(object):
             return format_icons(re.sub(r'{{Tooltip\|(.+?)\|.+?}}', lambda g: g.group(1), str_))
 
         embed = self.__page_constructor(6 + 2 * self.__is_retrofit, "Equipment & Misc.", has_banner=True)
-        print("IM WORKING FOR GODS SAKE")
         embed.add_field(name=u"🏹Equipment🏹", value=u"\u200b", inline=False)
         embed.add_field(name=f"{u'1️⃣'} {self.__data['Eq1Type']}", value=format_eq_eff(1), inline=False)
         embed.add_field(name=f"{u'2️⃣'} {self.__data['Eq2Type']}", value=format_eq_eff(2), inline=False)
