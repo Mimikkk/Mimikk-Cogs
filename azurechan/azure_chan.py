@@ -29,7 +29,7 @@ class AzureCog(commands.Cog):
 
     @commands.command(name="shipgirl")
     async def chat_send_ship_embed(self, context: Context):
-        """This sends embed, usage=[p]ship <NAME|Random>"""
+        """This sends menu with info about a shipgirl, usage: [p]ship <Name|Random>"""
 
         def extract_name(data: str) -> str:
             return unidecode(' '.join(re.findall(r'[^\s]+', data)[1:])).lower().strip()
@@ -53,18 +53,7 @@ class AzureCog(commands.Cog):
 
     @commands.command(name="alevent")
     async def chat_send_event_embed(self, context: Context):
-        """This sends event embed, usage=[p]alevent"""
+        """This sends info about recent events, usage: [p]alevent"""
 
         event_embed = EventEmbed()
         await menus.menu(context, pages=event_embed.pages, controls=event_embed.controls)
-
-    @commands.command(name="update-shipgirl-names-data")
-    async def update_ship_names_data(self):
-        """Command to update ship data, use seldom as it's timely"""
-        self.__update_ships()
-
-    @commands.command(name="get-version")
-    async def check_py_version(self, context: Context):
-        """This should send info about python version"""
-        await context.send(f"Needed python version {'.'.join(MIN_PYTHON_VERSION)}")
-
