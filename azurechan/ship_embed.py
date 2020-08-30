@@ -39,10 +39,10 @@ class ShipEmbed(object):
         # Get the rest of data needed which isn't directly in the cargo table
         ship_misc_data = get_api_data(action=f"?action=parse&page={self.__data['Name']}&prop=wikitext&format=json")
 
-        ship_misc_data = dict(re.findall(r' \| (Skill.+|Type\d|StatBonus.+|TechP.+|Reinforce.+|Scrap.+|B\d+) = (.+)',
+        ship_misc_data = dict(re.findall(r' \| (Skill.+|Type\d|StatBonus.+|TechP.+|Reinforce.+|Scrap.+|B\d+|D.+) = (.+)',
                                          ship_misc_data.json()['parse']['wikitext']['*']))
-
         self.__data.update(ship_misc_data)
+        print(*self.__data.items(), sep='\n', file=sys.stderr)
 
     def __init_ship_images(self):
         """This Supplies Image URLs of the Ship"""
@@ -75,9 +75,10 @@ class ShipEmbed(object):
         self.__page_skills()
         self.__page_limit_break()
         self.__page_equipment()
+        self.__page_drops_table()
         self.__page_card_info()
 
-    def __page_constructor(self, page_index: int,
+    def __page_constructor(self,
                            footer_desc: str,
                            is_retrofit_variant: bool = False,
                            has_banner: bool = False,
@@ -98,7 +99,7 @@ class ShipEmbed(object):
                  .set_author(name=f"{self.__data['Name']} {self.__data['Type']}",
                              icon_url=format_url("ImageShipyardIcon"))
                  .set_thumbnail(url=format_url("ImageIcon"))
-                 .set_footer(text=f"Page {page_index} : {footer_desc}", icon_url=format_url("ImageChibi")))
+                 .set_footer(text=f"Page {len(self.pages)+1} : {footer_desc}", icon_url=format_url("ImageChibi")))
 
         if has_banner:
             embed.set_image(url=format_url("ImageBanner"))
@@ -131,7 +132,7 @@ class ShipEmbed(object):
         type_: str
         embed: discord.Embed
         for (i, type_) in enumerate(self.__menu_types, 1):
-            embed = self.__page_constructor(i, type_, is_retrofit_variant=i > 3, has_banner=True)
+            embed = self.__page_constructor(type_, is_retrofit_variant=i > 3, has_banner=True)
 
             for stat in CONSTS.SHIP.STATS.TYPES.value:
                 embed.add_field(name=f'{get_stat_emoji()} - {stat}', value=format_stat(), inline=True)
@@ -140,7 +141,7 @@ class ShipEmbed(object):
 
     def __page_skills(self):
         """Skill Page creator either 4 or 6, depends whether the ship has a retrofit option"""
-        embed = self.__page_constructor(4 + 2 * self.__is_retrofit, "Skills", has_banner=True)
+        embed = self.__page_constructor("Skills", has_banner=True)
         embed.add_field(name=u"🕯Skills🕯", value="\u200b", inline=False)
 
         def format_description():
@@ -175,7 +176,7 @@ class ShipEmbed(object):
             return '\n'.join(map(lambda x: '• ' + x,
                                  filter(lambda x: bool(x.strip()), listify_strengthen(n).split(';'))))
 
-        embed = self.__page_constructor(5 + 2 * self.__is_retrofit, "Limit Breaks", has_banner=True)
+        embed = self.__page_constructor("Limit Breaks", has_banner=True)
 
         formats_ = (u'1️⃣ - First - 5', u'2️⃣ - Second - 10', u'3️⃣ - Third - 15', u'4️⃣ - Forth - 20', u'5️⃣ - Fifth - 25', u'6️⃣ - Sixth - 30')
         if self.__is_tech:
@@ -207,7 +208,7 @@ class ShipEmbed(object):
         def format_tooltips(str_: str) -> str:
             return format_icons(re.sub(r'{{Tooltip\|(.+?)\|.+?}}', lambda g: g.group(1), str_))
 
-        embed = self.__page_constructor(6 + 2 * self.__is_retrofit, "Equipment & Misc.", has_banner=True)
+        embed = self.__page_constructor("Equipment & Misc.", has_banner=True)
         embed.add_field(name=u"🏹Equipment🏹", value=u"\u200b", inline=False)
         embed.add_field(name=f"{u'1️⃣'} {self.__data['Eq1Type']}", value=format_eq_eff(1), inline=False)
         embed.add_field(name=f"{u'2️⃣'} {self.__data['Eq2Type']}", value=format_eq_eff(2), inline=False)
@@ -233,18 +234,60 @@ class ShipEmbed(object):
 
         self.pages.append(embed)
 
+    def __page_drops_table(self):
+        """Drops Page creator, either 7 or 9, depends whether the ship has a retrofit option"""
+        embed = self.__page_constructor("Drop Locations", has_banner=True)
+        def format_url(link: str) -> str:
+            return f"[{link}]({CONSTS.SQL.WIKI_URL.value}/{parse.quote(link.replace(' ', '_'))})"
+
+        def format_note() -> str:
+            return re.sub(r'\[\[(.+?)]]', lambda g: format_url(g.group(1)), self.__data['DropNote'])
+
+        drop_type = ""
+        drops = {}
+        is_event: bool = False
+        event_note: str = ""
+        for key in filter(lambda x: x.startswith("D"), self.__data.keys()):
+            if (match := re.match(r'(?i)d([a-z]+)', key)) and key not in ('DExchange', 'DropNote', 'Duplicate'):
+                if match.group(1) == 'Event':
+                    is_event = True
+                    event_note = format_note()
+                else:
+                    drop_type = match.group(1)
+            elif match := re.match(r'D(\d+?)-(\d+)', key):
+                (map_, level) = match.group(1), match.group(2)
+                if map_ not in drops: drops[map_] = []
+                drops[map_].append(level)
+
+        for map_ in drops:
+            drops[map_] = chat.humanize_list(drops[map_])
+        print(is_event, event_note, *drops.items(), drop_type, sep='\n')
+
+        embed.add_field(name="🛠Construction info🛠",
+                        value=f"{'Time: **' * bool(drop_type)}{self.__data['ConstructTime']}{f'** Type: **{drop_type}**' * bool(drop_type)}", inline=False)
+
+        embed.add_field(name="🗺Map Location🗺", value="\u200b" if drops else "Doesn't drop on any map.", inline=False)
+        for map_ in drops:
+            embed.add_field(name=f"Map: {map_}", value=f"levels: **{drops[map_]}**", inline=True)
+
+        if event_note:
+            embed.add_field(name="✨Event info✨", value=event_note, inline=False)
+
+        self.pages.append(embed)
+
     def __page_card_info(self, is_retrofit_variant: bool = False):
-        """Info Page creator, either 7 or 9 and 10, depends whether the ship has a retrofit option"""
+        """Info Page creator, either 8 or 10 and 11, depends whether the ship has a retrofit option"""
 
         def format_data(str_: str) -> str:
             str_ = val if (val := self.__data[str_]) else u'\u200b'
             name: str = str_
             html_page: str = ""
-            if '[[' in str_:
-                (wiki_page, name) = str_.lstrip('[').rstrip(']').split('|', 1)
-                html_page = wiki_page.split(':')[-1]
 
-            if '[' in str_:
+            if '[[' in name:
+                (wiki_page, name) = str_.lstrip('[').rstrip(']').split('|', 1)
+                html_page = f"{CONSTS.SQL.WIKIPEDIA_URL.value}{wiki_page.split(':')[-1]}"
+
+            elif '[' in name:
                 (html_page, name) = str_.lstrip('[').rstrip(']').split(' ', 1)
 
             return f'[{name}]({html_page})' if html_page and name != u'\u200b' else name
@@ -255,8 +298,10 @@ class ShipEmbed(object):
             return (CONSTS.SHIP.RETROFIT.RARITY.value[self.__data['Rarity']] if is_retrofit_variant
                     else self.__data['Rarity'])
 
-        embed = self.__page_constructor(7 + 2 * self.__is_retrofit + is_retrofit_variant, "Card Info",
-                                        has_splashart=True, is_retrofit_variant=is_retrofit_variant)
+        def get_name_url() -> str:
+            return f"{CONSTS.SQL.WIKI_URL.value}{self.__data['Name']}"
+
+        embed = self.__page_constructor("Card Info", has_splashart=True, is_retrofit_variant=is_retrofit_variant)
 
         embed.add_field(name=u"✨ - Nation", value=format_data('Nationality'), inline=True)
         embed.add_field(name="🎓 - Class", value=format_data('Class'), inline=True)
@@ -265,7 +310,10 @@ class ShipEmbed(object):
         embed.add_field(name=u"✍ - Artist", value=format_data("Artist"), inline=True)
         embed.add_field(name="🐦 - Twitter", value=format_data("ArtistTwitter"), inline=True)
         embed.add_field(name="🖌 - Pixiv", value=format_data("ArtistPixiv"), inline=True)
-        embed.add_field(name="🎤 - VA", value=format_data("VA"), inline=False)
+
+        embed.add_field(name="🎤 - VA", value=format_data("VA"), inline=True)
+        embed.add_field(name="\u200b", value="\u200b", inline=True)
+        embed.add_field(name="📄 - Wikipage", value=f"[{self.__data['Name']}]({get_name_url()})", inline=True)
         self.pages.append(embed)
 
         if self.__is_retrofit and not is_retrofit_variant: self.__page_card_info(is_retrofit_variant=True)
