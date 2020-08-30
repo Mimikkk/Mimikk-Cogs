@@ -29,7 +29,7 @@ class AzureCog(commands.Cog):
 
     @commands.command(name="shipgirl")
     async def chat_send_ship_embed(self, context: Context):
-        """This sends menu with info about a shipgirl, usage: [p]ship <Name|Random>"""
+        """This sends menu with info about a shipgirl"""
 
         def extract_name(data: str) -> str:
             return unidecode(' '.join(re.findall(r'[^\s]+', data)[1:])).lower().strip()
@@ -53,7 +53,7 @@ class AzureCog(commands.Cog):
 
     @commands.command(name="alevent")
     async def chat_send_event_embed(self, context: Context):
-        """This sends info about recent events, usage: [p]alevent"""
+        """This sends info about recent events"""
 
         event_embed = EventEmbed()
         await menus.menu(context, pages=event_embed.pages, controls=event_embed.controls)

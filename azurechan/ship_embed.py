@@ -363,4 +363,4 @@ def get_emoji(stat: str) -> str:
     return CONSTS.SHIP.STATS.EMOJI.value[stat]
 
 def embed_url(name: str, link: str) -> str:
-    return f"[{name}]({link})"
+    return f"[{name}]({link.replace(' ', '_')})"
