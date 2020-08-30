@@ -42,7 +42,6 @@ class ShipEmbed(object):
         ship_misc_data = dict(re.findall(r' \| (Skill.+|Type\d|StatBonus.+|TechP.+|Reinforce.+|Scrap.+|B\d+|D.+) = (.+)',
                                          ship_misc_data.json()['parse']['wikitext']['*']))
         self.__data.update(ship_misc_data)
-        print(*self.__data.items(), sep='\n', file=sys.stderr)
 
     def __init_ship_images(self):
         """This Supplies Image URLs of the Ship"""
@@ -261,7 +260,6 @@ class ShipEmbed(object):
 
         for map_ in drops:
             drops[map_] = chat.humanize_list(drops[map_])
-        print(is_event, event_note, *drops.items(), drop_type, sep='\n')
 
         embed.add_field(name="🛠Construction info🛠",
                         value=f"{'Time: **' * bool(drop_type)}{self.__data['ConstructTime']}{f'** Type: **{drop_type}**' * bool(drop_type)}", inline=False)
