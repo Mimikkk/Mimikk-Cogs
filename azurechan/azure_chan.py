@@ -28,8 +28,8 @@ class AzureCog(commands.Cog):
         cargo_dict += cargo_query(tables="equipment", fields="Name", offset="450", limit="500").json()
 
         for item in cargo_dict:
-            item_names[unidecode(str(item['Name'])).lower()] = str(item['Name'])
-
+            item_names[unidecode(str(item['Name'])).replace("&quot;", "\"").lower()] = str(item['Name'].replace("&quot;", "\""))
+        print("INIT", *item_names, sep='\n')
     @commands.command(name="update-supported-item-names")
     async def update_items(self):
         """Updates item data stored inside the Cog, Use seldom, it's Semi-Long"""
@@ -91,7 +91,7 @@ class AzureCog(commands.Cog):
             return unidecode(' '.join(re.findall(r'[^\s]+', data)[1:])).lower().strip()
 
         def find_similar_names(data: str, possibilities: Dict[str, str]) -> Tuple[str, ...]:
-            return tuple(map(str, get_close_matches(word=data, possibilities=possibilities, n=3)))
+            return tuple(map(str, get_close_matches(word=data, possibilities=possibilities, n=3, cutoff=0.3)))
 
         def format_similar_names(data: Tuple[str, ...]) -> str:
             return f"Did you mean {'any of these' if len(data) > 1 else 'this'} **{chat.humanize_list(data, style='or')}**?"
@@ -105,6 +105,7 @@ class AzureCog(commands.Cog):
                 names = item_names
 
             if name := extract_name(context.message.content):
+                print("NAME", name)
                 if name not in names and name != "random":
                     if similar_names := find_similar_names(name, names):
                         return format_similar_names(similar_names)

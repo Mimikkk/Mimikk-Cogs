@@ -34,8 +34,8 @@ def get_api_data(action: str, api_url: str = "https://azurlane.koumakan.jp/w/api
     return requests.get(url=api_url + action)
 
 def get_image_url(image_name: str, api_url: str = "https://azurlane.koumakan.jp") -> str:
-    return f'{api_url}/Special:Redirect/file/{parse.quote(image_name.replace(" ", "_"))}?width=800'
-
+    return (f'{api_url}/Special:Redirect/file/'
+            f'{parse.quote(image_name.replace(" ", "_") if image_name.endswith(".png") else (image_name+".png").replace(" ", "_"))}?width=800')
 
 def get_name_url(name: str, api_url: str = "https://azurlane.koumakan.jp") -> str:
     return f'{api_url}/{parse.quote(name.replace(" ", "_"))}'
