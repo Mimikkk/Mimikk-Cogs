@@ -10,7 +10,7 @@ class AzureCog(commands.Cog):
     def __init__(self):
         super().__init__()
         self.__update_ships()
-        # self.__update_items()
+        self.__update_items()
 
     @staticmethod
     def __update_ships():
@@ -25,11 +25,10 @@ class AzureCog(commands.Cog):
     def __update_items():
         """Updates item data stored inside the Cog"""
         cargo_dict: Dict = cargo_query(tables="equipment", fields="Name", limit="500").json()
-        cargo_dict.update(cargo_query(tables="equipment", fields="Name", offset="450", limit="500").json())
+        cargo_dict += cargo_query(tables="equipment", fields="Name", offset="450", limit="500").json()
 
         for item in cargo_dict:
-            if item['Rarity'] != "Unreleased" and item['Name'] not in item_names:
-                item_names[unidecode(str(item['Name'])).lower()] = str(item['Name'])
+            item_names[unidecode(str(item['Name'])).lower()] = str(item['Name'])
 
     @commands.command(name="update-supported-item-names")
     async def update_items(self):
