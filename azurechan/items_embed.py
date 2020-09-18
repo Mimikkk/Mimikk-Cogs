@@ -45,7 +45,7 @@ class ItemEmbed(object):
         pass
 
     def __page_stats(self):
-        for i in range(len(self.__data)):   # hopefully they're in oreder
+        for i in range(len(self.__data)):   # hopefully they're in-order
             pass
         pass
 
