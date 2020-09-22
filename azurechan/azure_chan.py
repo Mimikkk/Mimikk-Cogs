@@ -29,7 +29,7 @@ class AzureCog(commands.Cog):
 
         for item in cargo_dict:
             item_names[unidecode(str(item['Name'])).replace("&quot;", "\"").lower()] = str(item['Name'].replace("&quot;", "\""))
-        print("INIT", *item_names, sep='\n')
+
     @commands.command(name="update-supported-item-names")
     async def update_items(self):
         """Updates item data stored inside the Cog, Use seldom, it's Semi-Long"""
@@ -105,7 +105,6 @@ class AzureCog(commands.Cog):
                 names = item_names
 
             if name := extract_name(context.message.content):
-                print("NAME", name)
                 if name not in names and name != "random":
                     if similar_names := find_similar_names(name, names):
                         return format_similar_names(similar_names)
