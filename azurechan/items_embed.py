@@ -97,14 +97,18 @@ class ItemEmbed(object):
                                      f"{u' ⏩ ' + self.__data[i][max_] if self.__data[i][max_] else ''}",
                                 value="\u200b", inline=True)
 
-            if self.__data[i]['Notes']:
-                embed.add_field(name="Note:", value=self.__data[i]['Notes'], inline=False)
-            self.pages.append(embed)
-
             special_stats = ('Number', 'Spread', 'Angle',
                              'WepRange', 'Shells', 'Salvoes',
                              'Characteristic', 'PingFreq', 'VolleyTime',
-                             'Coef', 'Ammo', 'AAGun1', 'AAGun2', 'Bombs1', 'Bombs2', 'Notes')
+                             'Coef', 'Ammo', 'AAGun1', 'AAGun2', 'Bombs1', 'Bombs2')
+
+            for stat in special_stats:
+                embed.add_field(name="", value="", inline=True)
+
+            if self.__data[i]['Notes']:
+                embed.add_field(name="Note:", value=self.__data[i]['Notes'], inline=False)
+
+            self.pages.append(embed)
 
     """
     {'Name': 'Autoloader', 'Image': '2200.png', 'Type': 'Auxiliary', 'Stars': 4, 
