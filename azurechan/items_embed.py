@@ -39,7 +39,8 @@ class ItemEmbed(object):
                        '4': 0xCC7BFF, '5': 0xFDC637, '6': 0xBD4000}
         self.__name = self.__data[0]['Name'].replace("&quot;", "\"")
 
-        item_misc_data = get_api_data(f"?action=parse&page={parse.quote(self.__name.replace(' ', '_'))}&prop=wikitext&format=json")
+        item_misc_data = get_api_data(
+            f"?action=parse&page={parse.quote(self.__name.replace(' ', '_'))}&prop=wikitext&format=json")
 
         item_misc_data = dict(re.findall(r' \| (AE.*) = (.+)', item_misc_data.json()['parse']['wikitext']['*']))
         for dict_ in self.__data:
@@ -58,10 +59,13 @@ class ItemEmbed(object):
         self.__page_usability()
 
     def __page_constructor(self, author_desc: str, color: int, footer_desc: str):
-        return (discord.Embed(color=color)
-                .set_author(name=author_desc, icon_url=self.__image_url)
-                .set_thumbnail(url=self.__image_url)
-                .set_footer(text=f"Page {len(self.pages) + 1} : {footer_desc}", icon_url=self.__image_url))
+        embed = (discord.Embed(color=color)
+                 .set_author(name=author_desc, icon_url=self.__image_url)
+                 .set_thumbnail(url=self.__image_url)
+                 .set_footer(text=f"Page {len(self.pages) + 1} : {footer_desc}", icon_url=self.__image_url))
+        embed.title = self.__name
+        embed.url = get_name_url(self.__name)
+        return embed
 
     def __page_stats(self):
         stats = {"Health": "Health", "Torpedo": "Torpedo", "Firepower": "Firepower",
@@ -70,11 +74,12 @@ class ItemEmbed(object):
                  "AA": "Anti-Air", "Luck": "Luck", "Acc": "Accuracy", "Spd": "Speed",
                  "Damage": "Damage", "RoF": "Rate of Fire"}
 
-        emoji = {"PlaneHP": u'💞',"Health": u'❤', "Acc": u'🎯', "Damage": u'💥',
+        emoji = {"PlaneHP": u'💞', "Health": u'❤', "Acc": u'🎯', "Damage": u'💥',
                  "Reload": u'♻', "AA": u'📡', "Torp": u'🥢', "Air": u'🛩',
                  "Speed": u'⏩', "Luck": u'🎱', "ASW": u'🛥', "Oxygen": u'☁', "Ammo": u'🎹',
                  "ConstructTime": u'🛠', "Firepower": u'🔥', "Aviation": u'🛩', "RoF": u'♻',
-                 "Accuracy": u'🎯', "Torpedo": u'🥢', 'Tech': u'✨', "Evasion": u'👥', 'Notes':u'📄'}
+                 "Accuracy": u'🎯', "Torpedo": u'🥢', 'Tech': u'✨', "Evasion": u'👥',
+                 'Notes': u'📄'}
 
         max_stats = ("HealthMax", "TorpMax", "FPMax", "AvMax",
                      "EvasionMax", "PlaneHPMax", "ReloadMax", "ASWMax",
@@ -82,21 +87,24 @@ class ItemEmbed(object):
                      "DamageMax", "RoFMax",)
 
         for i in range(len(self.__data)):  # hopefully they're in-order
-            embed = self.__page_constructor(f"{self.__name} {self.__data[i]['Type']}",
+            embed = self.__page_constructor(f"{self.__data[i]['Type']}",
                                             self.__colors[i],
                                             f"Stats & Max Stats, {self.__stars[i]}")
 
             for (norm_, max_) in zip(stats, max_stats):
                 if self.__data[0][norm_] in ' 0': continue
-                embed.add_field(name=f"{emoji[norm_]}: "
-                                     f"{self.__data[i][norm_]}{u' ⏩ '+self.__data[i][max_] if self.__data[i][max_] else ''}", value="\u200b", inline=True)
+                embed.add_field(name=f"{emoji[norm_]}: {self.__data[i][norm_]}"
+                                     f"{u' ⏩ ' + self.__data[i][max_] if self.__data[i][max_] else ''}",
+                                value="\u200b", inline=True)
 
+            if self.__data[i]['Notes']:
+                embed.add_field(name="Note:", value=self.__data[i]['Notes'], inline=False)
             self.pages.append(embed)
+
             special_stats = ('Number', 'Spread', 'Angle',
                              'WepRange', 'Shells', 'Salvoes',
                              'Characteristic', 'PingFreq', 'VolleyTime',
                              'Coef', 'Ammo', 'AAGun1', 'AAGun2', 'Bombs1', 'Bombs2', 'Notes')
-
 
     """
     {'Name': 'Autoloader', 'Image': '2200.png', 'Type': 'Auxiliary', 'Stars': 4, 
@@ -119,9 +127,10 @@ class ItemEmbed(object):
 
     def __page_usability(self):
         def format_class(class_type: str):
-            return ship_classes[class_type], f"{use_classes[class_type]} {self.__data[0][class_type + 'Note']}"
+            return (f"{ship_classes[class_type]}-{class_type}",
+                    f"{use_classes[class_type]} {self.__data[0][class_type + 'Note']}")
 
-        embed = self.__page_constructor(f"{self.__name} {self.__data[0]['Type']}",
+        embed = self.__page_constructor(f"{self.__data[0]['Type']}",
                                         self.__colors[-1],
                                         f"Usability")
 
@@ -143,7 +152,7 @@ class ItemEmbed(object):
         self.pages.append(embed)
 
     def __page_drops(self):
-        embed = self.__page_constructor(f"{self.__name}, {self.__data[0]['Type']}",
+        embed = self.__page_constructor(f"{self.__data[0]['Type']}",
                                         self.__colors[-1],
                                         f"Drops")
 

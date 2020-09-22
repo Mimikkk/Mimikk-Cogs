@@ -91,11 +91,13 @@ class ShipEmbed(object):
             return self.__data[f"{image_type}{'Kai' if is_retrofit_variant else ''}_url"]
 
         embed = (discord.Embed(color=format_color())
-                 .set_author(name=f"{self.__data['Name']} {self.__data['Type']}",
+                 .set_author(name=f"{self.__data['Type']}",
                              icon_url=format_url("ImageShipyardIcon"))
                  .set_thumbnail(url=format_url("ImageIcon"))
                  .set_footer(text=f"Page {len(self.pages) + 1} : {footer_desc}", icon_url=format_url("ImageChibi")))
 
+        embed.title = self.__data['Name']
+        embed.url = get_name_url(self.__data['Name'])
         if has_banner:
             embed.set_image(url=format_url("ImageBanner"))
         elif has_splashart:
