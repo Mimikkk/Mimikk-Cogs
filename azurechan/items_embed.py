@@ -1,4 +1,4 @@
-from .ship_embed import get_api_data, create_select_controls, get_image_url, cargo_query, get_name_url
+from .utils import get_api_data, create_select_controls, get_image_url, cargo_query, get_name_url, embed_url
 from .imports import *
 
 item_names: Dict[str, str] = dict()
@@ -51,6 +51,18 @@ class ItemEmbed(object):
         self.__colors = tuple((item_colors[str(self.__data[i]['Stars'])] for i in range(len(self.__data))))
         self.__menu_reactions = (u'❌', *rarities, u'ℹ')
         self.__image_url = get_image_url(self.__data[0]['Image'])
+        self.__factor_notes()
+
+    def __factor_notes(self):
+        def format_link(str_: str):
+            if len(link := str_.split('|', 1)) > 1:
+                return embed_url(link[1], get_name_url(link[0]))
+            return embed_url(link[0], get_name_url(link[0]))
+
+        notes: Tuple[str, ...] = ("Notes", "DropLocation")
+        for dict_ in self.__data:
+            for note in notes:
+                dict_[note] = re.sub(r'\[\[(.+?)]]', lambda g: format_link(g.group(1)), dict_[note])
 
     def __init_pages(self):
         self.__page_stats()
@@ -72,11 +84,11 @@ class ItemEmbed(object):
                  "Speed": u'⏩', "Luck": u'🎱', "ASW": u'🛥', "Oxygen": u'☁', "Ammo": u'🎹',
                  "ConstructTime": u'🛠', "Firepower": u'🔥', "Aviation": u'🛩', "RoF": u'♻',
                  "Accuracy": u'🎯', "Torpedo": u'🥢', 'Tech': u'✨', "Evasion": u'👥',
-                 'Notes': u'📄', 'DropLocation': "🗺"}
+                 'Notes': u'📄', 'DropLocation': "🗺", 'Bombs': u'💣'}
 
-        stats = {"Health", "Torpedo", "Firepower", "Aviation",
+        stats = ("Health", "Torpedo", "Firepower", "Aviation",
                  "Evasion", "PlaneHP", "Reload", "ASW",
-                 "Oxygen", "AA", "Luck", "Acc", "Spd"}
+                 "Oxygen", "AA", "Luck", "Acc", "Spd")
 
         max_stats = ("HealthMax", "TorpMax", "FPMax", "AvMax",
                      "EvasionMax", "PlaneHPMax", "ReloadMax", "ASWMax",
@@ -89,7 +101,8 @@ class ItemEmbed(object):
 
             has_stats: bool = False
             for (norm_, max_) in zip(stats, max_stats):
-                if self.__data[0][norm_] in ' 0' and self.__data[0][max_] in ' 0': continue
+                if self.__data[i][norm_] in ' 0' and self.__data[i][max_] in ' 0': continue
+
                 if not has_stats:
                     has_stats = True
                     embed.add_field(name="Stat Changes:", value='\u200b', inline=False)
@@ -102,12 +115,12 @@ class ItemEmbed(object):
             if self.__data[i]['Salvoes']:
                 salvoes = self.__data[i]['Salvoes']
                 shells = self.__data[i]['Shells']
-                specialized[f"{emoji['Torp']} Volleys:"] = f"{salvoes} x {shells} shells"
+                specialized[f"{emoji['Torp']} Volleys:"] = f"**{salvoes} x {shells}** shells"
 
             if self.__data[i]['Characteristic']:
                 ammo = self.__data[i]["Ammo"] if self.__data[i]["Ammo"] else "Normal"
                 character = self.__data[i]["Characteristic"] if self.__data[i]["Characteristic"] else "Normal"
-                specialized[f"{emoji['Ammo']} Ammunition:"] = f"{ammo} Ammo with {character} Characteristic"
+                specialized[f"{emoji['Ammo']} Ammunition:"] = f"**{ammo}** Ammo with **{character}** Characteristic"
 
             if self.__data[i]['Angle']:
                 angle = self.__data[i]['Angle']
@@ -130,7 +143,7 @@ class ItemEmbed(object):
             if self.__data[i]['Bombs1']:
                 bombs1 = self.__data[i]['Bombs1']
                 bombs2 = self.__data[i]['Bombs2']
-                specialized["Bombs:"] = f"**{bombs1}**" + f" and **{bombs2}**" * bool(bombs2)
+                specialized[f"{emoji['Bombs']} Bombs:"] = f"**{bombs1}**" + f" and **{bombs2}**" * bool(bombs2)
 
             if self.__data[i]['Damage']:
                 dmg = self.__data[i]['Damage']
@@ -138,12 +151,12 @@ class ItemEmbed(object):
                 rof = self.__data[i]['RoF']
                 max_rof = self.__data[i]['RoFMax']
                 volley_time = self.__data[i]['VolleyTime']
-
                 salvoes = int(self.__data[i]['Salvoes']) if self.__data[i]['Salvoes'] else 0
                 shells = int(self.__data[i]['Shells']) if self.__data[i]['Shells'] else 0
                 projectiles = max(salvoes, shells, salvoes * shells)
                 coef = self.__data[i]['Coef']
-                specialized["Attack:"] = (
+
+                specialized[f"{emoji['Damage']} Attack:"] = (
                         f"**{dmg} → {max_dmg}**"
                         + f" **x {projectiles}**" * bool(projectiles > 1)
                         + f" with rate of fire of **{rof}s → {max_rof}**s per volley" * bool(rof)
