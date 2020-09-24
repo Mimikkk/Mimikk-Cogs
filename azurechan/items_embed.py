@@ -29,7 +29,6 @@ class ItemEmbed(object):
                                  where=f"equipment.Name='{item_names[name]}'", limit="10")
 
         for dict_ in cargo_data.json():
-            print(dict_)
             self.__data.append(dict(map(lambda x: (x, str(dict_[x])), dict_)))
 
         item_rarity = {'1': u'🥉', '2': u'🥈', '3': u'🥇', '4': u'🏅', '5': u'🎖', '6': u'🏆'}
