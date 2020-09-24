@@ -1,7 +1,5 @@
-from urllib import parse
-from .ship_embed import get_api_data, create_select_controls, get_image_url
+from .utils import get_api_data, create_select_controls, get_image_url
 from .imports import *
-
 
 class EventEmbed(object):
     def __init__(self):

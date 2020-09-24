@@ -1,8 +1,7 @@
-from urllib import parse
+from .utils import get_api_data, get_image_url, get_name_url, get_emoji, embed_url, cargo_query, create_select_controls
 from .imports import *
 
 ship_names: Dict[str, str] = dict()
-
 
 class ShipEmbed(object):
     """This Creates Ship Embed Menu using data from azur lane wiki"""
@@ -92,11 +91,13 @@ class ShipEmbed(object):
             return self.__data[f"{image_type}{'Kai' if is_retrofit_variant else ''}_url"]
 
         embed = (discord.Embed(color=format_color())
-                 .set_author(name=f"{self.__data['Name']} {self.__data['Type']}",
+                 .set_author(name=f"{self.__data['Type']}",
                              icon_url=format_url("ImageShipyardIcon"))
                  .set_thumbnail(url=format_url("ImageIcon"))
                  .set_footer(text=f"Page {len(self.pages) + 1} : {footer_desc}", icon_url=format_url("ImageChibi")))
 
+        embed.title = self.__data['Name']
+        embed.url = get_name_url(self.__data['Name'])
         if has_banner:
             embed.set_image(url=format_url("ImageBanner"))
         elif has_splashart:
@@ -316,51 +317,3 @@ class ShipEmbed(object):
     def get_rarity(self, is_retrofit_variant: bool = False) -> str:
         return (CONSTS.SHIP.RETROFIT.RARITY.value[self.__data['Rarity']]
                 if is_retrofit_variant else self.__data['Rarity'])
-
-
-def create_select_controls(reactions):
-    """Creates Menu's Reaction Based Navigation"""
-
-    async def select_page(ctx, pages, controls, message, page, timeout, emoji):
-        # if can manage messages remove the react
-        if message.channel.permissions_for(ctx.me).manage_messages:
-            with contextlib.suppress(discord.NotFound): await message.remove_reaction(emoji, ctx.author)
-        return await menus.menu(ctx, pages, controls, message=message, page=page, timeout=timeout)
-
-    def wrap(func, num: int):
-        async def wrapper(*args):
-            args = list(args)
-            args[4] = num
-            return await func(*args)
-
-        return wrapper
-
-    # could use old good '< x >' keys
-    # self.controls = menus.DEFAULT_CONTROLS
-    _select: Callable[[int], Callable] = lambda num: wrap(select_page, num)
-    return {emoji: menus.close_menu if i == -1 else _select(i) for (i, emoji) in enumerate(reactions, -1)}
-
-
-def cargo_query(tables: str = "", fields: str = "", where: str = "", limit: str = "50", output_format: str = "json",
-                api_url: str = "https://azurlane.koumakan.jp/w/index.php?"):
-    return requests.get(url=api_url + "title=Special:CargoExport"
-                                      f"&tables={tables}&fields={fields}&where={where}"
-                                      f"&limit={limit}&format={output_format}")
-
-
-def get_api_data(action: str, api_url: str = "https://azurlane.koumakan.jp/w/api.php") -> requests.Response:
-    return requests.get(url=api_url + action)
-
-
-def get_image_url(image_name: str, api_url: str = "https://azurlane.koumakan.jp") -> str:
-    return f'{api_url}/Special:Redirect/file/{parse.quote(image_name.replace(" ", "_"))}?width=800'
-
-
-def get_name_url(name: str, api_url: str = "https://azurlane.koumakan.jp") -> str:
-    return f'{api_url}/{parse.quote(name.replace(" ", "_"))}'
-
-def get_emoji(stat: str) -> str:
-    return CONSTS.SHIP.STATS.EMOJI.value[stat]
-
-def embed_url(name: str, link: str) -> str:
-    return f"[{name}]({link.replace(' ', '_')})"

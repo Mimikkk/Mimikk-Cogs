@@ -7,6 +7,7 @@ from redbot.core import commands                    # Redbot commands
 from .data.consts import CONSTS                     # Consts used in Azure-Chan
 from unidecode import unidecode                     # Unicode to ASCII encoder
 from random import choice
+from urllib import parse
 from typing import *                                # Python Types
 import contextlib
 import requests                                     # API Handler
