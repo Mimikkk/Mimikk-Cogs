@@ -64,7 +64,7 @@ class CONSTS(Enum):
                      "Speed": u'⏩', "Luck": u'🎱', "ASW": u'🛥', "Oxygen": u'☁', "Ammo": u'🎹',
                      "ConstructTime": u'🛠', "Firepower": u'🔥', "Aviation": u'🛩', "RoF": u'♻',
                      "Accuracy": u'🎯', "Torpedo": u'🥢', 'Coin': u'📀', "Medal": u'🎖', 'Tech': u'✨',
-                     "Oil": u'🛢', "Evasion": u'👥', "Anti-Air": u'📡'}
+                     "Oil": u'🛢', "Evasion": u'👥', "Anti-Air": u'📡', 'Specialized Core': u'🔬'}
 
             TYPES = ("Health", "Armor", "Oil", "Acc", "Fire",
                      "Reload", "Anti-Air", "Torpedo", "Aviation", "Evasion",

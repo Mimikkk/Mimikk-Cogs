@@ -33,7 +33,7 @@ class ItemEmbed(object):
             self.__data.append(dict(map(lambda x: (x, str(dict_[x])), dict_)))
 
         item_rarity = {'1': u'🥉', '2': u'🥈', '3': u'🥇', '4': u'🏅', '5': u'🎖', '6': u'🏆'}
-        item_stars = {'1': u'NR-⭐', '2': u'NR-⭐⭐', '3': u'R-⭐⭐⭐',
+        item_stars = {'1': u'N-⭐', '2': u'N-⭐⭐', '3': u'R-⭐⭐⭐',
                       '4': u'E-⭐⭐⭐⭐', '5': u'SR-⭐⭐⭐⭐⭐', '6': u'UR-⭐⭐⭐⭐⭐⭐'}
         item_colors = {'1': 0xCCCCCC, '2': 0xCCCCCC, '3': 0x41D7FF,
                        '4': 0xCC7BFF, '5': 0xFDC637, '6': 0xBD4000}
@@ -50,12 +50,11 @@ class ItemEmbed(object):
         rarities = (item_rarity[str(self.__data[i]['Stars'])] for i in range(len(self.__data)))
         self.__stars = tuple((item_stars[str(self.__data[i]['Stars'])] for i in range(len(self.__data))))
         self.__colors = tuple((item_colors[str(self.__data[i]['Stars'])] for i in range(len(self.__data))))
-        self.__menu_reactions = (u'❌', *rarities, u'🗺', u'ℹ')
+        self.__menu_reactions = (u'❌', *rarities, u'ℹ')
         self.__image_url = get_image_url(self.__data[0]['Image'])
 
     def __init_pages(self):
         self.__page_stats()
-        self.__page_drops()
         self.__page_usability()
 
     def __page_constructor(self, author_desc: str, color: int, footer_desc: str):
@@ -71,70 +70,103 @@ class ItemEmbed(object):
         stats = {"Health": "Health", "Torpedo": "Torpedo", "Firepower": "Firepower",
                  "Aviation": "Aviation", "Evasion": "Evasion", "PlaneHP": "Plane Health",
                  "Reload": "Reload", "ASW": "ASW", "Oxygen": "Oxygen",
-                 "AA": "Anti-Air", "Luck": "Luck", "Acc": "Accuracy", "Spd": "Speed",
-                 "Damage": "Damage", "RoF": "Rate of Fire"}
+                 "AA": "Anti-Air", "Luck": "Luck", "Acc": "Accuracy", "Spd": "Speed"}
 
         emoji = {"PlaneHP": u'💞', "Health": u'❤', "Acc": u'🎯', "Damage": u'💥',
                  "Reload": u'♻', "AA": u'📡', "Torp": u'🥢', "Air": u'🛩',
                  "Speed": u'⏩', "Luck": u'🎱', "ASW": u'🛥', "Oxygen": u'☁', "Ammo": u'🎹',
                  "ConstructTime": u'🛠', "Firepower": u'🔥', "Aviation": u'🛩', "RoF": u'♻',
                  "Accuracy": u'🎯', "Torpedo": u'🥢', 'Tech': u'✨', "Evasion": u'👥',
-                 'Notes': u'📄'}
+                 'Notes': u'📄', 'DropLocation': "🗺"}
 
         max_stats = ("HealthMax", "TorpMax", "FPMax", "AvMax",
                      "EvasionMax", "PlaneHPMax", "ReloadMax", "ASWMax",
-                     "OxygenMax", "AAMax", "LuckMax", "AccMax", "SpdMax",
-                     "DamageMax", "RoFMax",)
+                     "OxygenMax", "AAMax", "LuckMax", "AccMax", "SpdMax", "RoFMax",)
 
         for i in range(len(self.__data)):  # hopefully they're in-order
-            embed = self.__page_constructor(f"{self.__data[i]['Type']}",
+            embed = self.__page_constructor(f"{self.__data[0]['Nationality']} {self.__data[i]['Type']}",
                                             self.__colors[i],
                                             f"Stats & Max Stats, {self.__stars[i]}")
 
+            has_stats: bool = False
             for (norm_, max_) in zip(stats, max_stats):
-                if self.__data[0][norm_] in ' 0': continue
+                if self.__data[0][norm_] in ' 0' and self.__data[0][max_] in ' 0': continue
+                if not has_stats:
+                    has_stats = True
+                    embed.add_field(name="Stat Changes:", value='\u200b', inline=False)
+
                 embed.add_field(name=f"{emoji[norm_]}: {self.__data[i][norm_]}"
-                                     f"{u' ⏩ ' + self.__data[i][max_] if self.__data[i][max_] else ''}",
+                                     f"{' → ' + self.__data[i][max_] if self.__data[i][max_] else ''}",
                                 value="\u200b", inline=True)
 
-            special_stats = ('Number', 'Spread', 'Angle',
-                             'WepRange', 'Shells', 'Salvoes',
-                             'Characteristic', 'PingFreq', 'VolleyTime',
-                             'Coef', 'Ammo', 'AAGun1', 'AAGun2', 'Bombs1', 'Bombs2')
+            specialized: Dict[str, str] = {}
+            if self.__data[i]['Salvoes']:
+                salvoes = self.__data[i]['Salvoes']
+                shells = self.__data[i]['Shells']
+                specialized["Volleys:"] = f"{salvoes} x {shells} shells"
 
-            for stat in special_stats:
-                embed.add_field(name="", value="", inline=True)
+            if self.__data[i]['Characteristic']:
+                ammo = self.__data[i]["Ammo"] if self.__data[i]["Ammo"] else "Normal"
+                character = self.__data[i]["Characteristic"] if self.__data[i]["Characteristic"] else "Normal"
+                specialized["Ammunition:"] = f"{ammo} Ammo with {character} Characteristic"
+
+            if self.__data[i]['Angle']:
+                angle = self.__data[i]['Angle']
+                spread = self.__data[i]['Spread']
+                range_ = self.__data[i]['WepRange']
+                specialized["Angle and Spread:"] = (f"**{angle}°**"
+                                                    + f" ± **{spread}°**" * bool(spread)
+                                                    + f" with the range of **{range_}**" * bool(range_))
+
+            if self.__data[i]['PingFreq']:
+                ping_freq = self.__data[i]['PingFreq']
+                specialized["Ping:"] = f"**{ping_freq}s** per swap"
+
+            if self.__data[i]['AAGun1']:
+                aa_gun1 = self.__data[i]['AAGun1']
+                aa_gun2 = self.__data[i]['AAGun2']
+                specialized["Anti-Air Guns:"] = f"**{aa_gun1}**" + f" and **{aa_gun2}**" * bool(aa_gun2)
+
+            if self.__data[i]['Bombs1']:
+                bombs1 = self.__data[i]['Bombs1']
+                bombs2 = self.__data[i]['Bombs2']
+                specialized["Bombs:"] = f"**{bombs1}**" + f" and **{bombs2}**" * bool(bombs2)
+
+            if self.__data[i]['Damage']:
+                dmg = self.__data[i]['Damage']
+                max_dmg = self.__data[i]['DamageMax']
+                rof = self.__data[i]['RoF']
+                max_rof = self.__data[i]['RoFMax']
+                volley_time = self.__data[i]['VolleyTime']
+
+                salvoes = int(self.__data[i]['Salvoes']) if self.__data[i]['Salvoes'] else 0
+                shells = int(self.__data[i]['Shells']) if self.__data[i]['Shells'] else 0
+                projectiles = max(salvoes, shells, salvoes * shells)
+                coef = self.__data[i]['Coef']
+                specialized["Attack:"] = (
+                        f"**{dmg} → {max_dmg}**"
+                        + f" **x {projectiles}**" * bool(projectiles > 1)
+                        + f" with rate of fire of **{rof}s → {max_rof}**s per volley" * bool(rof)
+                        + f" at **{coef}%** Efficiency" * bool(coef)
+                        + f" and action time of **{volley_time}s**" * bool(volley_time))
+
+            for (stat_name, stat_format) in specialized.items():
+                embed.add_field(name=stat_name, value=stat_format, inline=False)
 
             if self.__data[i]['Notes']:
-                embed.add_field(name="Note:", value=self.__data[i]['Notes'], inline=False)
+                embed.add_field(name=f"{emoji['Notes']} Note:", value=self.__data[i]['Notes'], inline=False)
+
+            drop_info = self.__data[i]['DropLocation'] if self.__data[i]['DropLocation'] else "Unknown"
+            embed.add_field(name=f"{emoji['DropLocation']} Acquired:", value=drop_info, inline=False)
 
             self.pages.append(embed)
-
-    """
-    {'Name': 'Autoloader', 'Image': '2200.png', 'Type': 'Auxiliary', 'Stars': 4, 
-     'Nationality': 'Universal', 'Tech': 'T3', 'Health': '', 'HealthMax': '', 
-     'Torpedo': '', 'TorpMax': '', 'Firepower': 3, 'FPMax': 7, 'Aviation': '', 
-     'AvMax': '', 'Evasion': '', 'EvasionMax': '', 'PlaneHP': '', 'PlaneHPMax': '', 
-     'Reload': '', 'ReloadMax': '', 'ASW': '', 'ASWMax': '', 'Oxygen': '', 
-     'OxygenMax': '', 'AA': '', 'AAMax': '', 'Luck': '',
-     'LuckMax': '', 'Acc': '', 'AccMax': '', 'Spd': '', 'SpdMax': '', 'Damage': '', 
-     'DamageMax': '', 'RoF': 14, 'RoFMax': 35, 'Number': '', 'Spread': '', 'Angle': '', 
-     'WepRange': '', 'Shells': '', 'Salvoes': '','Characteristic': '', 'PingFreq': '', 
-     'VolleyTime': '', 'Coef': '', 'Ammo': '', 'AAGun1': '', 'AAGun2': '',
-     'Bombs1': '', 'Bombs2': '', 'DD': 1, 'DDNote': '', 'CL': 1, 'CLNote': '', 
-     'CA': 1, 'CANote': '', 'CB': 1, 'CBNote': '', 'BM': 1, 'BMNote': '', 'BB': 1, 
-     'BBNote': '', 'BC': 1, 'BCNote': '', 'BBV': 1, 'BBVNote': '', 'CV': '', 'CVNote': '', 
-     'CVL': '', 'CVLNote': '', 'AR': 1, 'ARNote': '', 'SS': 1, 'SSNote': '', 'SSV': '',
-     'SSVNote': '', 'DropLocation': '[[6-3]], [[10-1]], [[11-3]], Any T3/4 Tech box', 
-     'Notes': ''}
-     """
 
     def __page_usability(self):
         def format_class(class_type: str):
             return (f"{ship_classes[class_type]}-{class_type}",
                     f"{use_classes[class_type]} {self.__data[0][class_type + 'Note']}")
 
-        embed = self.__page_constructor(f"{self.__data[0]['Type']}",
+        embed = self.__page_constructor(f"{self.__data[0]['Nationality']} {self.__data[0]['Type']}",
                                         self.__colors[-1],
                                         f"Usability")
 
@@ -153,13 +185,6 @@ class ItemEmbed(object):
         for class_ in use_classes:
             name, value = format_class(class_)
             embed.add_field(name=name, value=value, inline=False)
-        self.pages.append(embed)
-
-    def __page_drops(self):
-        embed = self.__page_constructor(f"{self.__data[0]['Type']}",
-                                        self.__colors[-1],
-                                        f"Drops")
-
         self.pages.append(embed)
 
     def __init_controls(self):
