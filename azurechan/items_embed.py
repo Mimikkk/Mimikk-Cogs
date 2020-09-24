@@ -36,8 +36,8 @@ class ItemEmbed(object):
                       '4': u'E-⭐⭐⭐⭐', '5': u'SR-⭐⭐⭐⭐⭐', '6': u'UR-⭐⭐⭐⭐⭐⭐'}
         item_colors = {'1': 0xCCCCCC, '2': 0xCCCCCC, '3': 0x41D7FF,
                        '4': 0xCC7BFF, '5': 0xFDC637, '6': 0xBD4000}
-        self.__name = self.__data[0]['Name'].replace("&quot;", "\"")
 
+        self.__name = self.__data[0]['Name'].replace("&quot;", "\"")
         item_misc_data = get_api_data(
             f"?action=parse&page={parse.quote(self.__name.replace(' ', '_'))}&prop=wikitext&format=json")
 
@@ -66,10 +66,6 @@ class ItemEmbed(object):
         return embed
 
     def __page_stats(self):
-        stats = {"Health": "Health", "Torpedo": "Torpedo", "Firepower": "Firepower",
-                 "Aviation": "Aviation", "Evasion": "Evasion", "PlaneHP": "Plane Health",
-                 "Reload": "Reload", "ASW": "ASW", "Oxygen": "Oxygen",
-                 "AA": "Anti-Air", "Luck": "Luck", "Acc": "Accuracy", "Spd": "Speed"}
 
         emoji = {"PlaneHP": u'💞', "Health": u'❤', "Acc": u'🎯', "Damage": u'💥',
                  "Reload": u'♻', "AA": u'📡', "Torp": u'🥢', "Air": u'🛩',
@@ -77,6 +73,10 @@ class ItemEmbed(object):
                  "ConstructTime": u'🛠', "Firepower": u'🔥', "Aviation": u'🛩', "RoF": u'♻',
                  "Accuracy": u'🎯', "Torpedo": u'🥢', 'Tech': u'✨', "Evasion": u'👥',
                  'Notes': u'📄', 'DropLocation': "🗺"}
+
+        stats = {"Health", "Torpedo", "Firepower", "Aviation",
+                 "Evasion", "PlaneHP", "Reload", "ASW",
+                 "Oxygen", "AA", "Luck", "Acc", "Spd"}
 
         max_stats = ("HealthMax", "TorpMax", "FPMax", "AvMax",
                      "EvasionMax", "PlaneHPMax", "ReloadMax", "ASWMax",
@@ -102,29 +102,30 @@ class ItemEmbed(object):
             if self.__data[i]['Salvoes']:
                 salvoes = self.__data[i]['Salvoes']
                 shells = self.__data[i]['Shells']
-                specialized["Volleys:"] = f"{salvoes} x {shells} shells"
+                specialized[f"{emoji['Torp']} Volleys:"] = f"{salvoes} x {shells} shells"
 
             if self.__data[i]['Characteristic']:
                 ammo = self.__data[i]["Ammo"] if self.__data[i]["Ammo"] else "Normal"
                 character = self.__data[i]["Characteristic"] if self.__data[i]["Characteristic"] else "Normal"
-                specialized["Ammunition:"] = f"{ammo} Ammo with {character} Characteristic"
+                specialized[f"{emoji['Ammo']} Ammunition:"] = f"{ammo} Ammo with {character} Characteristic"
 
             if self.__data[i]['Angle']:
                 angle = self.__data[i]['Angle']
                 spread = self.__data[i]['Spread']
                 range_ = self.__data[i]['WepRange']
-                specialized["Angle and Spread:"] = (f"**{angle}°**"
-                                                    + f" ± **{spread}°**" * bool(spread)
-                                                    + f" with the range of **{range_}**" * bool(range_))
+                specialized[f"{emoji['Acc']} Angle and Spread:"] = (
+                        f"**{angle}°**"
+                        + f" ± **{spread}°**" * bool(spread)
+                        + f" with the range of **{range_}**" * bool(range_))
 
             if self.__data[i]['PingFreq']:
                 ping_freq = self.__data[i]['PingFreq']
-                specialized["Ping:"] = f"**{ping_freq}s** per swap"
+                specialized[f"{emoji['AA']} Radar:"] = f"**{ping_freq}s** per swap"
 
             if self.__data[i]['AAGun1']:
                 aa_gun1 = self.__data[i]['AAGun1']
                 aa_gun2 = self.__data[i]['AAGun2']
-                specialized["Anti-Air Guns:"] = f"**{aa_gun1}**" + f" and **{aa_gun2}**" * bool(aa_gun2)
+                specialized[f"{emoji['AA']} Anti-Air Guns:"] = f"**{aa_gun1}**" + f" and **{aa_gun2}**" * bool(aa_gun2)
 
             if self.__data[i]['Bombs1']:
                 bombs1 = self.__data[i]['Bombs1']
