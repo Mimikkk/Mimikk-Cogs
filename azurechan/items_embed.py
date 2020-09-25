@@ -58,7 +58,7 @@ class ItemEmbed(object):
         for dict_ in self.__data:
             for note in notes:
                 dict_[note] = re.sub(r'\[\[(.+?)]]', lambda g: format_link(g.group(1)),
-                                     dict_[note].replace("&lt;br&gt;", "\n").replace("&lt;br/&gt;", "\n").replace('&quot;', '"'))
+                                     dict_[note].replace("&lt;br&gt;", "\n").replace("&lt;br/&gt;", "\n").replace('&quot;', '"').replace('&amp;', '&'))
 
     def __init_pages(self):
         self.__page_stats()
