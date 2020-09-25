@@ -35,8 +35,9 @@ class ItemEmbed(object):
         item_misc_data = \
             get_api_data(f"?action=parse&page={parse.quote(self.__name.replace(' ', '_'))}&prop=wikitext&format=json")
 
-        item_misc_data = dict(re.findall(r' \| (AE.*) = (.+)', item_misc_data.json()['parse']['wikitext']['*']))
+        item_misc_data = dict(re.findall(r' ?\| ?(AE.*|All) ?= ?(.+)', item_misc_data.json()['parse']['wikitext']['*']))
         for dict_ in self.__data:
+            dict_['All'] = '1' if item_misc_data.get('All') else ''
             dict_['AE'] = '1' if item_misc_data.get('AE') else ''
             dict_['AENote'] = note if (note := item_misc_data.get('AENotes')) else ''
 
@@ -56,7 +57,8 @@ class ItemEmbed(object):
         notes: Tuple[str, ...] = ("Notes", "DropLocation")
         for dict_ in self.__data:
             for note in notes:
-                dict_[note] = re.sub(r'\[\[(.+?)]]', lambda g: format_link(g.group(1)), dict_[note])
+                dict_[note] = re.sub(r'\[\[(.+?)]]', lambda g: format_link(g.group(1)),
+                                     dict_[note].replace("&lt;br&gt;", "\n").replace("&lt;br/&gt;", "\n"))
 
     def __init_pages(self):
         self.__page_stats()
@@ -153,7 +155,7 @@ class ItemEmbed(object):
         use_classes = {}
         for class_ in CONSTS.SHIP.CLASSES.value:
             use_classes[class_] = \
-                (u'✅' if self.__data[0][class_] == '1' else (u'☑' if self.__data[0][class_] == '2' else u'❌'))
+                (u'✅' if self.__data[0][class_] == '1' or self.__data[0]['All'] == '1' else (u'☑' if self.__data[0][class_] == '2' else u'❌'))
 
         embed.add_field(name="Used By:", value="\u200b", inline=False)
         for class_ in use_classes:
