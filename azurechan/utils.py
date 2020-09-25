@@ -41,7 +41,7 @@ def get_name_url(name: str, api_url: str = "https://azurlane.koumakan.jp") -> st
     return f'{api_url}/{parse.quote(name.replace(" ", "_"))}'
 
 def get_emoji(stat: str) -> str:
-    return CONSTS.EMOJI.value[stat]
+    return CONSTS.EMOJI.value[stat] if stat in CONSTS.EMOJI.value else u'❓'
 
 def embed_url(name: str, link: str) -> str:
     return f"[{name}]({link.replace(' ', '_')})"
