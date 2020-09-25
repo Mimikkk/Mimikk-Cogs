@@ -8,7 +8,7 @@ class CONSTS(Enum):
              "ConstructTime": u'🛠', "Firepower": u'🔥', "Aviation": u'🛩', "RoF": u'♻',
              "Accuracy": u'🎯', "Torpedo": u'🥢', 'Coin': u'📀', "Medal": u'🎖', 'Tech': u'✨',
              "Oil": u'🛢', "Evasion": u'👥', "Anti-Air": u'📡', 'Specialized Core': u'🔬',
-             'Notes': u'📄', 'DropLocation': "🗺", "Damage": u'💥', 'Bombs': u'💣'}
+             'Notes': u'📄', 'DropLocation': "🗺", "Damage": u'💥', 'Bombs': u'💣', 'Spd': u'⏩'}
 
     @skip
     class SQL(Enum):
