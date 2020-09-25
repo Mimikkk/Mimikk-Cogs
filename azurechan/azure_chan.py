@@ -31,14 +31,16 @@ class AzureCog(commands.Cog):
             item_names[unidecode(str(item['Name'])).replace("&quot;", "\"").lower()] = str(item['Name'].replace("&quot;", "\""))
 
     @commands.command(name="update-supported-item-names")
-    async def update_items(self):
+    async def update_items(self, context: Context):
         """Updates item data stored inside the Cog, Use seldom, it's Semi-Long"""
         self.__update_items()
+        await context.send(f'Item database updated.')
 
     @commands.command(name="update-supported-ship-names")
-    async def update_ships(self):
+    async def update_ships(self, context: Context):
         """Updates ship data stored inside the Cog, Use seldom, it's Semi-Long"""
         self.__update_ships()
+        await context.send(f'Ship database updated.')
 
     @commands.command(name="supported-ship-names")
     async def display_supported_ship_names(self, context: Context):
