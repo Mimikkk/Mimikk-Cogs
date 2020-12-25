@@ -275,7 +275,6 @@ class ShipEmbed(object):
         for map_ in drops: embed.add_field(name=f"Map: {map_}", value=f"levels: **{drops[map_]}**", inline=True)
         if drop_note:
             embed.add_field(name=f"✨{'Exchange' if is_exchange else 'Event'} info✨", value=drop_note, inline=False)
-        print(embed.fields)
         self.pages.append(embed)
 
     def __page_card_info(self, is_retrofit_variant: bool = False):
