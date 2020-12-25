@@ -266,7 +266,9 @@ class ShipEmbed(object):
 
         embed.add_field(name="🛠Construction info🛠",
                         value=f"Time: **{self.__data['ConstructTime']}** Type: **{drop_type}**"
-                        if is_drop else self.__data['ConstructTime'],
+                        if is_drop else (
+                            self.__data['ConstructTime']
+                            if self.__data['ConstructTime'] else "Cannot be constructed."),
                         inline=False)
 
         embed.add_field(name="🗺Map Location🗺", value="\u200b" if drops else "Doesn't drop on any map.", inline=False)
@@ -274,7 +276,7 @@ class ShipEmbed(object):
         for map_ in drops: embed.add_field(name=f"Map: {map_}", value=f"levels: **{drops[map_]}**", inline=True)
         if drop_note:
             embed.add_field(name=f"✨{'Exchange' if is_exchange else 'Event'} info✨", value=drop_note, inline=False)
-
+        print(embed.fields)
         self.pages.append(embed)
 
     def __page_card_info(self, is_retrofit_variant: bool = False):
