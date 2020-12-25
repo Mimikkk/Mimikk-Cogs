@@ -1,7 +1,7 @@
 from .utils import get_api_data, get_image_url, get_name_url, get_emoji, embed_url, cargo_query, create_select_controls
 from .imports import *
 
-ship_names: Dict[str, str] = dict()
+ship_ids: Dict[str, str] = dict()
 
 class ShipEmbed(object):
     """This Creates Ship Embed Menu using data from azur lane wiki"""
@@ -32,11 +32,10 @@ class ShipEmbed(object):
 
         # Get data from a cargo table with ship data
         ship_data = cargo_query(tables="ships", fields=CONSTS.SQL.SHIP_TABLE_ALL_FIELDS.value,
-                                where=f"ships.Name='{ship_names[name]}'", limit="1")
+                                where=f"ships.ShipID='{ship_ids[name]}'", limit="1")
         data: Dict[str, str]
         for data in ship_data.json():
             self.__data = dict(map(lambda x: (x, str(data[x])), data))
-
         # Get the rest of data needed which isn't directly in the cargo table
         ship_misc_data = get_api_data(f"?action=parse&page={self.__data['Name']}&prop=wikitext&format=json")
         ship_misc_data = dict(

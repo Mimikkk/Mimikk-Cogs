@@ -1,4 +1,4 @@
-from .ship_embed import ShipEmbed, cargo_query, ship_names
+from .ship_embed import ShipEmbed, cargo_query, ship_ids
 from .event_embed import EventEmbed
 from .items_embed import ItemEmbed, item_names
 from .imports import *
@@ -15,11 +15,11 @@ class AzureCog(commands.Cog):
     @staticmethod
     def __update_ships():
         """Updates ship data stored inside the Cog"""
-        cargo = cargo_query(tables="ships", fields="Name,Rarity", limit="500")
+        cargo = cargo_query(tables="ships", fields="Name,ShipID,Rarity", limit="500")
 
         for ship in cargo.json():
-            if ship['Rarity'] != "Unreleased" and ship['Name'] not in ship_names:
-                ship_names[unidecode(str(ship['Name'])).lower()] = str(ship['Name'])
+            if ship['Rarity'] != "Unreleased" and ship['Name'] not in ship_ids:
+                ship_ids[unidecode(str(ship['Name'])).lower()] = str(f"{ship['ShipID']:0>3}")
 
     @staticmethod
     def __update_items():
@@ -45,7 +45,7 @@ class AzureCog(commands.Cog):
     @commands.command(name="supported-ship-names")
     async def display_supported_ship_names(self, context: Context):
         """Displays supported ship names"""
-        pages = [*chat.pagify(chat.humanize_list(tuple(ship_names.values())), shorten_by=20)]
+        pages = [*chat.pagify(chat.humanize_list(tuple(ship_ids.keys())), shorten_by=20)]
         len_ = len(pages)
 
         for (i, page) in enumerate(pages, 1):
@@ -102,7 +102,7 @@ class AzureCog(commands.Cog):
         if type_ in ('ship', 'item'):
             names: Dict[str, str] = {}
             if type_ == 'ship':
-                names = ship_names
+                names = ship_ids
             elif type_ == 'item':
                 names = item_names
 
