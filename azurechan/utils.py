@@ -23,6 +23,7 @@ def create_select_controls(reactions):
     _select: Callable[[int], Callable] = lambda num: wrap(select_page, num)
     return {emoji: menus.close_menu if i == -1 else _select(i) for (i, emoji) in enumerate(reactions, -1)}
 
+
 def cargo_query(tables: str = "", fields: str = "", where: str = "", limit: str = "50", output_format: str = "json",
                 api_url: str = "https://azurlane.koumakan.jp/w/index.php?",
                 offset: str = "0"):
@@ -30,18 +31,23 @@ def cargo_query(tables: str = "", fields: str = "", where: str = "", limit: str 
                                       f"&tables={tables}&fields={fields}&where={where}"
                                       f"&offset={offset}&limit={limit}&format={output_format}")
 
+
 def get_api_data(action: str, api_url: str = "https://azurlane.koumakan.jp/w/api.php") -> requests.Response:
     return requests.get(url=api_url + action)
 
+
 def get_image_url(image_name: str, api_url: str = "https://azurlane.koumakan.jp") -> str:
     return (f'{api_url}/Special:Redirect/file/'
-            f'{parse.quote(image_name.replace(" ", "_") if image_name.endswith(".png") else (image_name+".png").replace(" ", "_"))}?width=800')
+            f'{parse.quote(image_name.replace(" ", "_") if image_name.endswith(".png") else (image_name + ".png").replace(" ", "_"))}?width=800')
+
 
 def get_name_url(name: str, api_url: str = "https://azurlane.koumakan.jp") -> str:
     return f'{api_url}/{parse.quote(name.replace(" ", "_"))}'
 
+
 def get_emoji(stat: str) -> str:
     return CONSTS.EMOJI.value[stat] if stat in CONSTS.EMOJI.value else u'❓'
+
 
 def embed_url(name: str, link: str) -> str:
     return f"[{name}]({link.replace(' ', '_')})"

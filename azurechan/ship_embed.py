@@ -39,7 +39,7 @@ class ShipEmbed(object):
         # Get the rest of data needed which isn't directly in the cargo table
         ship_misc_data = get_api_data(f"?action=parse&page={self.__data['Name']}&prop=wikitext&format=json")
         ship_misc_data = dict(
-            re.findall(r' \| (Skill.+|Type\d|StatBonus.+|TechP.+|Reinforce.+|Scrap.+|B\d+|D.+) = (.+)',
+            re.findall(r' \| (Skill.+|Type\d|StatBonus.+|TechP.+|Reinforce.+|Scrap.+|B\d+|D.+|LB\d) = (.+)',
                        ship_misc_data.json()['parse']['wikitext']['*']))
 
         self.__data.update(ship_misc_data)
@@ -47,13 +47,13 @@ class ShipEmbed(object):
     def __init_ship_images(self):
         """This Supplies Image URLs of the Ship"""
         for image_name in self.__images_types:
-            self.__data[f'{image_name}_url'] = get_image_url(self.__data[image_name])
+            self.__data[f'Image{image_name}_url'] = get_image_url(f"{self.__data['Name']}{image_name}")
 
     def __init_ship_data(self):
         """This initializes data used by the ShipEmbed"""
 
         # Checks if is retrofit based on presence of Retrofit image b/c wiki data is Borked as per usual
-        self.__is_retrofit = bool(self.__data['ImageKai'])
+        self.__is_retrofit = self.__data['HealthKai'] == 0
         self.__is_tech = bool('B5' in self.__data)
 
         self.__menu_reactions = (CONSTS.SHIP.RETROFIT.MENU_REACTIONS.value if self.__is_retrofit
@@ -62,6 +62,7 @@ class ShipEmbed(object):
                              else CONSTS.SHIP.NORMAL.MENU_TYPES.value)
         self.__images_types = (CONSTS.SHIP.RETROFIT.IMAGES.value if self.__is_retrofit
                                else CONSTS.SHIP.NORMAL.IMAGES.value)
+
 
     def __init_controls(self):
         """Creates Menu based on reactions on retrofit option"""
