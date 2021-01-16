@@ -1,6 +1,7 @@
 from .ship_embed import ShipEmbed, cargo_query, ship_ids
 from .event_embed import EventEmbed
 from .items_embed import ItemEmbed, item_names
+from azurechan.utils import get_image_url
 from .imports import *
 
 
@@ -35,6 +36,10 @@ class AzureCog(commands.Cog):
         """Updates item data stored inside the Cog, Use seldom, it's Semi-Long"""
         self.__update_items()
         await context.send(f'Item database updated.')
+
+    @commands.command(name="chibi")
+    async def send_chibi_image(self, context: Context):
+        await context.send(AzureCog.chat_get_embed(context, "image", image_type="chibi"))
 
     @commands.command(name="update-supported-ship-names")
     async def update_ships(self, context: Context):
@@ -83,7 +88,7 @@ class AzureCog(commands.Cog):
         await menus.menu(context, pages=embed.pages, controls=embed.controls)
 
     @staticmethod
-    def chat_get_embed(context: Context, type_: str):
+    def chat_get_embed(context: Context, type_: str, *, image_type: str = ""):
         """
         Gets chat embed depending of the given type.
             Possible types: 'ship', 'item', 'event'
@@ -99,9 +104,9 @@ class AzureCog(commands.Cog):
             return f"Did you mean {'any of these' if len(data) > 1 else 'this'} **{chat.humanize_list(data, style='or')}**?"
 
         type_ = type_.lower().strip()
-        if type_ in ('ship', 'item'):
+        if type_ in ('ship', 'item', 'image'):
             names: Dict[str, str] = {}
-            if type_ == 'ship':
+            if type_ == 'ship' or 'image':
                 names = ship_ids
             elif type_ == 'item':
                 names = item_names
@@ -111,13 +116,20 @@ class AzureCog(commands.Cog):
                     if similar_names := find_similar_names(name, names):
                         return format_similar_names(similar_names)
                     return "Name either mistyped or nonexistent."
+                if name == "random": name = choice(tuple(names.keys()))
 
                 if type_ == 'ship':
-                    return ShipEmbed(name if name != "random" else choice(tuple(names.keys())))
+                    return ShipEmbed(name)
                 elif type_ == 'item':
-                    return ItemEmbed(name if name != "random" else choice(tuple(names.keys())))
+                    return ItemEmbed(name)
+                elif type_ == "image":
+                    name = cargo_query(tables="ships", fields="Name",
+                                       where=f"ships.ShipID='{ship_ids[name]}'",
+                                       limit="1").json()[0]["Name"]
+                    if image_type:
+                        return get_image_url(f"{name}{image_type.capitalize()}")
+                    return get_image_url(f"{name}Chibi")
             return "Name was not specified."
-
         elif type_ == 'event':
             return EventEmbed()
 

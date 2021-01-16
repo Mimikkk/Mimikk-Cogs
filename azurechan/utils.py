@@ -33,6 +33,7 @@ def cargo_query(tables: str = "", fields: str = "", where: str = "", limit: str 
 
 
 def get_api_data(action: str, api_url: str = "https://azurlane.koumakan.jp/w/api.php") -> requests.Response:
+    print(api_url+action)
     return requests.get(url=api_url + action)
 
 
