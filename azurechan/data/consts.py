@@ -52,7 +52,7 @@ class CONSTS(Enum):
                       "Ultra Rare": "Ultra Rare", "Decisive": "Decisive", "Priority": "Priority"}
 
             IMAGES = ("", "ShipyardIcon", "Chibi", "Icon", "Banner",
-                      "Kai", "ShipyardIconKai", "ChibiKai", "IconKai", "BannerKai")
+                      "Kai", "KaiShipyardIcon", "KaiChibi", "KaiIcon", "KaiBanner")
 
             MENU_REACTIONS = u'❌🛶🛥⛴🚤🛳🎯🏵🪀🗺ℹ🇷'
             MENU_TYPES = ("Base Stats", "Max Stats", "Cognitive Max Stats",

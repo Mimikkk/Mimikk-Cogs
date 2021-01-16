@@ -47,13 +47,15 @@ class ShipEmbed(object):
     def __init_ship_images(self):
         """This Supplies Image URLs of the Ship"""
         for image_name in self.__images_types:
+            print(f'Image{image_name}_url')
             self.__data[f'Image{image_name}_url'] = get_image_url(f"{self.__data['Name']}{image_name}")
 
     def __init_ship_data(self):
         """This initializes data used by the ShipEmbed"""
 
         # Checks if is retrofit based on presence of Retrofit image b/c wiki data is Borked as per usual
-        self.__is_retrofit = self.__data['HealthKai'] == 0
+        self.__is_retrofit = self.__data['HealthKai'] != '0'
+        print(type(self.__data["HealthKai"]))
         self.__is_tech = bool('B5' in self.__data)
 
         self.__menu_reactions = (CONSTS.SHIP.RETROFIT.MENU_REACTIONS.value if self.__is_retrofit
@@ -87,19 +89,19 @@ class ShipEmbed(object):
         def format_color() -> int:
             return CONSTS.SHIP.RARITY.COLORS.value[self.get_rarity(is_retrofit_variant=is_retrofit_variant)]
 
-        def format_url(image_type: str) -> str:
-            return self.__data[f"{image_type}{'Kai' if is_retrofit_variant else ''}_url"]
+        def format_url(image: str, type_: str = "") -> str:
+            return self.__data[f"{image}{'Kai' if is_retrofit_variant else ''}{type_}_url"]
 
         embed = (discord.Embed(color=format_color())
                  .set_author(name=f"{self.__data['Type']}",
-                             icon_url=format_url("ImageShipyardIcon"))
-                 .set_thumbnail(url=format_url("ImageIcon"))
-                 .set_footer(text=f"Page {len(self.pages) + 1} : {footer_desc}", icon_url=format_url("ImageChibi")))
+                             icon_url=format_url("Image", "ShipyardIcon"))
+                 .set_thumbnail(url=format_url("Image", "Icon"))
+                 .set_footer(text=f"Page {len(self.pages) + 1} : {footer_desc}", icon_url=format_url("Image", "Chibi")))
 
         embed.title = self.__data['Name']
         embed.url = get_name_url(self.__data['Name'])
         if has_banner:
-            embed.set_image(url=format_url("ImageBanner"))
+            embed.set_image(url=format_url("Image", "Banner"))
         elif has_splashart:
             embed.set_image(url=format_url("Image"))
 
@@ -195,7 +197,7 @@ class ShipEmbed(object):
                     + self.__is_retrofit * f" {u'⏩'} {self.__data[f'Eq{eq_slot}EffInitKai']}")
 
         def format_icons(str_: str) -> str:
-            return re.sub(r'{{(.+?)\}\}', lambda g: get_emoji(g.group(1)), str_)
+            return re.sub(r'{{(.+?)}}', lambda g: get_emoji(g.group(1)), str_)
 
         def format_tooltips(str_: str) -> str:
             return format_icons(re.sub(r'{{Tooltip\|(.+?)\|.+?}}', lambda g: g.group(1), str_))
