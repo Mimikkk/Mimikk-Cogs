@@ -47,7 +47,6 @@ class ShipEmbed(object):
     def __init_ship_images(self):
         """This Supplies Image URLs of the Ship"""
         for image_name in self.__images_types:
-            print(f'Image{image_name}_url')
             self.__data[f'Image{image_name}_url'] = get_image_url(f"{self.__data['Name']}{image_name}")
 
     def __init_ship_data(self):
@@ -55,7 +54,6 @@ class ShipEmbed(object):
 
         # Checks if is retrofit based on presence of Retrofit image b/c wiki data is Borked as per usual
         self.__is_retrofit = self.__data['HealthKai'] != '0'
-        print(type(self.__data["HealthKai"]))
         self.__is_tech = bool('B5' in self.__data)
 
         self.__menu_reactions = (CONSTS.SHIP.RETROFIT.MENU_REACTIONS.value if self.__is_retrofit

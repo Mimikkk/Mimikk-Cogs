@@ -106,11 +106,10 @@ class AzureCog(commands.Cog):
         type_ = type_.lower().strip()
         if type_ in ('ship', 'item', 'image'):
             names: Dict[str, str] = {}
-            if type_ == 'ship' or 'image':
+            if type_ in ('ship', 'image'):
                 names = ship_ids
             elif type_ == 'item':
                 names = item_names
-
             if name := extract_name(context.message.content):
                 if name not in names and name != "random":
                     if similar_names := find_similar_names(name, names):
