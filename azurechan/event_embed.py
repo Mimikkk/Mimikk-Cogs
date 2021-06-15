@@ -40,7 +40,7 @@ class EventEmbed(object):
                  .set_footer(text=f"{server_title} Server News", icon_url=get_image_url(f"{image_ship}Chibi.png"))
                  )
 
-        news_feed: Iterable = map(lambda data: dict(re.findall(r'\| (.+?) = (.+)', data)), news)
+        news_feed: Iterable = map(lambda data: dict(re.findall(r'\| (.+?)\s*=\s*(.+)', data)), news)
         for (emoji, news) in zip((u'1️⃣', u'2️⃣', u'3️⃣', u'4️⃣', u'5️⃣', u'6️⃣'), news_feed):
             date = f"{news['day']}/{news['month']}."
             embed.add_field(
