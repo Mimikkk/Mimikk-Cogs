@@ -39,7 +39,7 @@ class ShipEmbed(object):
         # Get the rest of data needed which isn't directly in the cargo table
         ship_misc_data = get_api_data(f"?action=parse&page={self.__data['Name']}&prop=wikitext&format=json")
         ship_misc_data = dict(
-            re.findall(r' \| (Skill.+|Type\d|StatBonus.+|TechP.+|Reinforce.+|Scrap.+|B\d+|D.+|LB\d) = (.+)',
+            re.findall(r' \| (Skill.+|Type\d|StatBonus.+|TechP.+|Reinforce.+|Scrap.+|B\d+|D.+|LB\d)\s*=\s*(.+)',
                        ship_misc_data.json()['parse']['wikitext']['*']))
 
         self.__data.update(ship_misc_data)
